@@ -1,113 +1,187 @@
-import Image from 'next/image'
+"use client";
+
+import Header from "./components/header";
+import GameLayout from "./components/gameLayout";
+import { useEffect, useState, useRef } from "react";
+import { twMerge } from "tailwind-merge";
+import Footer from "./components/footer";
+import DialogWinner from "./components/DialogWinner";
+import Confeti from "./components/confeti";
+import JSConfetti from "js-confetti";
+
+const shuffleArray = (array: number[]) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // Intercambiar elementos
+  }
+};
+const numerosConsecutivos = Array.from({ length: 8 }, (_, i) => i + 1);
+const newBoxes = numerosConsecutivos.concat(numerosConsecutivos);
+shuffleArray(newBoxes);
 
 export default function Home() {
+  const [boxes, setBoxes] = useState(newBoxes);
+
+  const [clearedCards, setClearedCards] = useState({});
+  const [itemsSelected, setItemsSelected] = useState<number[]>([]);
+
+  const [showModal, setShowModal] = useState(false);
+  const [moves, setMoves] = useState(0);
+  const timeout = useRef<NodeJS.Timeout | null>(null);
+  const [timer, setTimer] = useState(0);
+  const [isTimingRuning, setIsTimingRuning] = useState(false);
+
+  const checkCompletion = () => {
+    if (Object.keys(clearedCards).length === numerosConsecutivos.length) {
+      setShowModal(true);
+      setIsTimingRuning(false);
+    }
+  };
+
+  const evaluate = () => {
+    const [firstSelected, secondSelected] = itemsSelected;
+    // enable();
+    if (boxes[firstSelected] === boxes[secondSelected]) {
+      setClearedCards((prev) => ({
+        ...prev,
+        [boxes[secondSelected]]: true,
+      }));
+      setItemsSelected([]);
+      return;
+    }
+    timeout.current = setTimeout(() => {
+      setItemsSelected([]);
+    }, 500);
+  };
+
+  const handleCardClick = (index: number) => {
+    setIsTimingRuning(true);
+
+    if (itemsSelected.length === 1) {
+      setItemsSelected((prev) => [...prev, index]);
+      setMoves((moves) => moves + 1);
+      // disable();
+    } else {
+      setItemsSelected([index]);
+    }
+  };
+  useEffect(() => {
+    let timeout: NodeJS.Timeout | null = null;
+    if (itemsSelected.length === 2) {
+      timeout = setTimeout(evaluate, 0);
+    }
+  }, [itemsSelected]);
+  useEffect(() => {
+    checkCompletion();
+  }, [clearedCards]);
+
+  const checkIsInactive = (card: number) => {
+    return Boolean(clearedCards[card as keyof {}]);
+  };
+
+  const handleRestart = () => {
+    setClearedCards({});
+    setItemsSelected([]);
+    setShowModal(false);
+    setMoves(0);
+    // setShouldDisableAllCards(false);
+    shuffleArray(newBoxes);
+    setTimer(0);
+    setBoxes(newBoxes);
+  };
+
+  const checkIsFlipped = (index: number) => {
+    return itemsSelected.includes(index);
+  };
+  const jsConfetti = new JSConfetti();
+  if (showModal) {
+    jsConfetti.addConfetti({
+      emojis: ["🦄", "✨", "🌈"],
+      emojiSize: 20,
+      confettiNumber: 50,
+      confettiRadius: 6,
+    });
+  }
+
+  useEffect(() => {
+    let intervalo: any;
+
+    if (isTimingRuning) {
+      intervalo = setInterval(() => {
+        setTimer((prevTiempo) => prevTiempo + 1);
+      }, 1000);
+    } else {
+      clearInterval(intervalo);
+    }
+
+    return () => clearInterval(intervalo);
+  }, [isTimingRuning]);
+
+  const formatearTiempo = (timer: number) => {
+    const minutos = Math.floor(timer / 60);
+    const segundos = timer % 60;
+    return (
+      (minutos < 10 ? "0" : "") +
+      minutos +
+      ":" +
+      (segundos < 10 ? "0" : "") +
+      segundos
+    );
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="bg-content">
+      <DialogWinner
+        formatearTiempo={() => formatearTiempo(timer)}
+        showModal={showModal}
+        moves={moves}
+        timer={timer}
+        handleRestart={handleRestart}
+      />
+      <GameLayout>
+        <Header handleRestart={handleRestart} />
+
+        <main className="my-[6rem] m-auto  ">
+          <div
+            className={twMerge(
+              `grid grid-cols-[repeat(4,100px)] gap-4 grid-rows-[repeat(4,100px)] items center justify-center`
+            )}
           >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+            {/* <Confeti /> */}
+            {boxes?.map((item, index) => {
+              const isfliped = checkIsFlipped(index);
+              const isInactive = checkIsInactive(item);
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+              return (
+                <button
+                  onClick={() => handleCardClick(index)}
+                  // isInactive={checkIsInactive(boxes)}
+                  // isDisabled={shouldDisableAllCards}
+                  key={index}
+                  className={twMerge(
+                    "rounded-full w-full h-full cursor-pointer ",
+                    isfliped
+                      ? "bg-orange text-white pointer-events-none select-none"
+                      : "bg-white hover:bg-[#023047]",
+                    isInactive &&
+                      "pointer-events-none select-none bg-orange text-red-500"
+                  )}
+                >
+                  <p className="text-6xl font-bold text-center">
+                    {isfliped && item}
+                    {isInactive && item}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </main>
+        <Footer
+          formatearTiempo={() => formatearTiempo(timer)}
+          timer={timer}
+          moves={moves}
         />
-      </div>
-
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+      </GameLayout>
+    </div>
+  );
 }
