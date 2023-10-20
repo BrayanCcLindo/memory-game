@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import Header from "./components/header";
@@ -6,7 +7,6 @@ import { useEffect, useState, useRef } from "react";
 import { twMerge } from "tailwind-merge";
 import Footer from "./components/footer";
 import DialogWinner from "./components/DialogWinner";
-import Confeti from "./components/confeti";
 import JSConfetti from "js-confetti";
 
 const shuffleArray = (array: number[]) => {
@@ -19,7 +19,7 @@ const numerosConsecutivos = Array.from({ length: 8 }, (_, i) => i + 1);
 const newBoxes = numerosConsecutivos.concat(numerosConsecutivos);
 shuffleArray(newBoxes);
 
-export default function Home() {
+function Home() {
   const [boxes, setBoxes] = useState(newBoxes);
 
   const [clearedCards, setClearedCards] = useState({});
@@ -147,7 +147,6 @@ export default function Home() {
               `grid grid-cols-[repeat(4,100px)] gap-4 grid-rows-[repeat(4,100px)] items center justify-center`
             )}
           >
-            {/* <Confeti /> */}
             {boxes?.map((item, index) => {
               const isfliped = checkIsFlipped(index);
               const isInactive = checkIsInactive(item);
@@ -155,8 +154,6 @@ export default function Home() {
               return (
                 <button
                   onClick={() => handleCardClick(index)}
-                  // isInactive={checkIsInactive(boxes)}
-                  // isDisabled={shouldDisableAllCards}
                   key={index}
                   className={twMerge(
                     "rounded-full w-full h-full cursor-pointer ",
@@ -185,3 +182,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default Home;
