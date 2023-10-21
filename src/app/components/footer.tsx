@@ -1,4 +1,6 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+"use client";
+
+import { ReactNode } from "react";
 
 function Footer({
   moves,

@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
+typeof window === "undefined";
 
 import Header from "./components/header";
 import GameLayout from "./components/gameLayout";

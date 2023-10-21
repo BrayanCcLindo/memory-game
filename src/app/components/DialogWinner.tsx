@@ -1,3 +1,5 @@
+"use client";
+
 import * as Dialog from "@radix-ui/react-dialog";
 import Button from "./button";
 import { ReactNode, useEffect, useState } from "react";
