@@ -1,6 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-typeof window === "undefined";
+
+if (typeof window !== undefined) {
+  document.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+  });
+}
 
 import Header from "./components/header";
 import GameLayout from "./components/gameLayout";
