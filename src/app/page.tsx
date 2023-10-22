@@ -1,11 +1,10 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-if (typeof window !== undefined) {
-  document.addEventListener("contextmenu", function (e) {
-    e.preventDefault();
-  });
-}
+const dropDownMenu =
+  typeof document !== "undefined" &&
+  document.querySelector("state-select-dropdown-box");
+console.log(dropDownMenu, "dropDownMenu");
 
 import Header from "./components/header";
 import GameLayout from "./components/gameLayout";
