@@ -7,7 +7,7 @@ function Button({
   onClick,
 }: {
   children: React.ReactNode;
-  variant?: string;
+  variant?: "primary" | "secondary";
   onClick?: React.ReactEventHandler;
 }) {
   return (

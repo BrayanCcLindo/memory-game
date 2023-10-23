@@ -125,7 +125,7 @@ function Game() {
     );
   };
   return (
-    <div className="bg-content">
+    <div className="bg-content h-screen p-4">
       <DialogWinner
         formatearTiempo={() => formatearTiempo(timer)}
         showModal={showModal}
@@ -136,10 +136,12 @@ function Game() {
       <GameLayout>
         <Header handleRestart={handleRestart} />
 
-        <main className="my-[6rem] m-auto  ">
+        <main className="my-[5rem] m-auto  md:my-[6rem] lg:my-[4rem]">
           <div
             className={twMerge(
-              `grid grid-cols-[repeat(4,100px)] gap-4 grid-rows-[repeat(4,100px)] items center justify-center`
+              `grid grid-cols-[repeat(4,70px)] gap-4 grid-rows-[repeat(4,70px)] items center justify-center`,
+              "md:grid-cols-[repeat(4,90px)] md:grid-rows-[repeat(4,90px)]",
+              "lg:grid-cols-[repeat(4,100px)] lg:grid-rows-[repeat(4,100px)]"
             )}
           >
             {boxes?.map((item, index) => {
@@ -154,12 +156,17 @@ function Game() {
                     "rounded-full w-full h-full cursor-pointer ",
                     isfliped
                       ? "bg-orange text-white pointer-events-none select-none"
-                      : "bg-white hover:bg-[#023047]",
+                      : "bg-white md:hover:bg-[#023047]",
                     isInactive &&
                       "pointer-events-none select-none bg-orange text-red-500"
                   )}
                 >
-                  <p className="text-6xl font-bold text-center">
+                  <p
+                    className={twMerge(
+                      "text-4xl font-bold text-center",
+                      "md:text-6xl"
+                    )}
+                  >
                     {isfliped && item}
                     {isInactive && item}
                   </p>

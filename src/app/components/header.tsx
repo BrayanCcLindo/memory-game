@@ -23,7 +23,9 @@ function Header({
       <div className="flex w-full items-center justify-between">
         <Image src="/logo.png" alt="" height={200} width={200} />
         <div className="flex gap-4">
-          <Button onClick={handleRestart}>Restart</Button>
+          <Button variant="secondary" onClick={handleRestart}>
+            Restart
+          </Button>
         </div>
       </div>
     </>

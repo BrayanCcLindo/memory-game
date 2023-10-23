@@ -2,7 +2,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Game from "./components/game";
 
 function Home() {
   const DynamicComponentWithNoSSR = dynamic(
